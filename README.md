@@ -189,6 +189,11 @@ Retrieve text content from an element.
 - **Parameters**:
   - `elementUUID`: Element identifier
 
+
+#### `appium_press_enter`
+
+Press the Enter key on the device (useful for confirming input fields).
+
 #### `appium_screenshot`
 
 Capture a screenshot of the current screen.

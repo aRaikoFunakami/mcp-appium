@@ -15,6 +15,7 @@ import getText from './interactions/getText.js';
 import screenshot from './interactions/screenshot.js';
 import activateApp from './interactions/activateApp.js';
 import terminateApp from './interactions/terminateApp.js';
+import pressEnter from './interactions/pressEnter.js';
 
 export default function registerTools(server: FastMCP): void {
   selectPlatform(server);
@@ -34,5 +35,6 @@ export default function registerTools(server: FastMCP): void {
   getText(server);
   screenshot(server);
   generateTest(server);
+  pressEnter(server);
   console.log('All tools registered');
 }
