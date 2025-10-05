@@ -58,6 +58,7 @@ npm run build
 
 ```bash
 node dist/index.js --sse --port=7777
+npm run start:sse -- --port=7777
 ```
 - **意味**: ビルドによって生成された、修正済みのJavaScriptプログラムを実行し、ローカルサーバーを起動します。テストを実行する際は、このローカルサーバーを参照するように設定してください。
 
