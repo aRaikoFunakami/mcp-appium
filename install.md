@@ -7,7 +7,7 @@
 ### ステップ1：ソースコードの取得
 
 ```bash
-git clone https://github.com/AppiumTestDistribution/mcp-appium.git
+git clone https://github.com/aRaikoFunakami/mcp-appium.git
 cd mcp-appium
 ```
 - **意味**: GitHubからプロジェクトのソースコード一式を、お使いのPCにダウンロード（クローン）し、プロジェクトディレクトリに移動します。
