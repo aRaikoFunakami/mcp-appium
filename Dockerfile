@@ -12,9 +12,8 @@ RUN apt-get update && apt-get install -y \
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# ステップ1: mcp-appiumリポジトリをクローン
-RUN git clone https://github.com/aRaikoFunakami/mcp-appium.git . && \
-    git checkout testroid
+# ステップ1: すべてのソースコードをコピー
+COPY . .
 
 # ステップ3: Appium実行環境の整備
 RUN npm install -g appium && \
