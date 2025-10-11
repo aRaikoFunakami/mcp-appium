@@ -5,7 +5,11 @@ import { z } from 'zod';
 import fs from 'fs';
 import { AndroidUiautomator2Driver } from 'appium-uiautomator2-driver';
 import { XCUITestDriver } from 'appium-xcuitest-driver';
-import { setSession, hasActiveSession, safeDeleteSession } from './sessionStore.js';
+import {
+  setSession,
+  hasActiveSession,
+  safeDeleteSession,
+} from './sessionStore.js';
 
 // Define capabilities type
 interface Capabilities {
@@ -34,6 +38,7 @@ export default function createSession(server: any): void {
         ),
       capabilities: z
         .object({})
+        .passthrough()
         .optional()
         .describe('Optional custom capabilities for the session (W3C format).'),
     }),
@@ -45,7 +50,9 @@ export default function createSession(server: any): void {
       try {
         // Check if there's an existing session and clean it up first
         if (hasActiveSession()) {
-          console.log('Existing session detected, cleaning up before creating new session...');
+          console.log(
+            'Existing session detected, cleaning up before creating new session...'
+          );
           await safeDeleteSession();
         }
 
