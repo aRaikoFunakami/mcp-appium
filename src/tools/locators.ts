@@ -30,17 +30,29 @@ export default function generateLocators(server: any): void {
 
         try {
           // Get the page source from the driver
+          const startPageSource = Date.now();
           const pageSource = await driver.getPageSource();
+          const pageSourceTime = Date.now() - startPageSource;
+          console.log(`⏱️  driver.getPageSource() took ${pageSourceTime}ms`);
+
           const driverName = (await driver.caps.automationName).toLowerCase();
           if (!pageSource) {
             throw new Error('Page source is empty or null');
           }
           const sampleXML = pageSource;
+
+          const startAllElements = Date.now();
           const allElements = generateAllElementLocators(
             sampleXML,
             true,
             driverName
           );
+          const allElementsTime = Date.now() - startAllElements;
+          console.log(
+            `⏱️  generateAllElementLocators (all) took ${allElementsTime}ms, found ${allElements.length} elements`
+          );
+
+          const startInteractable = Date.now();
           const interactableElements = generateAllElementLocators(
             sampleXML,
             true,
@@ -48,6 +60,15 @@ export default function generateLocators(server: any): void {
             {
               fetchableOnly: true,
             }
+          );
+          const interactableTime = Date.now() - startInteractable;
+          console.log(
+            `⏱️  generateAllElementLocators (interactable) took ${interactableTime}ms, found ${interactableElements.length} elements`
+          );
+
+          const totalTime = Date.now() - startPageSource;
+          console.log(
+            `⏱️  Total generate_locators execution time: ${totalTime}ms`
           );
           return {
             content: [

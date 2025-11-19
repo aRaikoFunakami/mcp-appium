@@ -210,6 +210,79 @@ export function getSuggestedLocators(
 }
 
 /**
+ * Get suggested selectors for all locator strategies (optimized version with pre-parsed DOM)
+ */
+export function getSuggestedLocatorsWithDOM(
+  selectedElement: JSONElement,
+  sourceDoc: XMLDocument,
+  isNative: boolean,
+  automationName: string
+): [string, string][] {
+  const simpleLocators = getSimpleSuggestedLocators(
+    selectedElement.attributes,
+    sourceDoc,
+    isNative
+  );
+  const complexLocators = getComplexSuggestedLocators(
+    selectedElement.path,
+    sourceDoc,
+    isNative,
+    automationName
+  );
+
+  // Combine all locators
+  const allLocators = { ...simpleLocators, ...complexLocators };
+
+  // Define priority order based on platform preference
+  let priorityOrder: string[];
+
+  if (
+    isNative &&
+    (automationName === 'xcuitest' || automationName === 'mac2')
+  ) {
+    // iOS priority: Accessibility Id > Predicate > Class Chain > XPath > Class Name
+    priorityOrder = [
+      'id',
+      'accessibility id',
+      '-ios predicate string',
+      '-ios class chain',
+      'xpath',
+      'class name',
+    ];
+  } else if (isNative && automationName === 'uiautomator2') {
+    // Android priority: Accessibility Id > UiAutomator > XPath > Class Name
+    priorityOrder = [
+      'id',
+      'accessibility id',
+      'xpath',
+      '-android uiautomator',
+      'class name',
+    ];
+  } else {
+    priorityOrder = ['id', 'class name', 'xpath'];
+  }
+
+  // Sort locators by priority order, keeping only available ones
+  const sortedLocators: [string, string][] = [];
+
+  // Add locators in priority order
+  for (const strategy of priorityOrder) {
+    if (allLocators[strategy]) {
+      sortedLocators.push([strategy, allLocators[strategy]]);
+    }
+  }
+
+  // Add any remaining locators that weren't in the priority list (like 'id' for native contexts)
+  for (const [strategy, value] of _.toPairs(allLocators)) {
+    if (!priorityOrder.includes(strategy)) {
+      sortedLocators.push([strategy, value]);
+    }
+  }
+
+  return [sortedLocators[0]];
+}
+
+/**
  * Return information about whether an xpath query results in a unique element, and the non-unique
  * index of the element in the document if not unique
  */
@@ -436,9 +509,8 @@ export function getOptimalClassChain(
         continue;
       }
       const xpath = `//${domNode.nodeName || '*'}[@${attrName}="${attrValue}"]`;
-      classChain = `/${
-        domNode.nodeName || '*'
-      }[\`${attrName} == "${attrValue}"\`]`;
+      classChain = `/${domNode.nodeName || '*'
+        }[\`${attrName} == "${attrValue}"\`]`;
 
       // If the XPath does not parse, move to the next unique attribute
       try {

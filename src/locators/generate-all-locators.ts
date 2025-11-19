@@ -1,8 +1,8 @@
 // Standalone Node.js script to generate locators for all elements from sourceXML
 // Using existing functions from src/locators directory
 
-import { getSuggestedLocators } from './locator-generation.js';
-import { xmlToJSON, JSONElement } from './source-parsing.js';
+import { getSuggestedLocatorsWithDOM } from './locator-generation.js';
+import { xmlToJSON, xmlToDOM, JSONElement } from './source-parsing.js';
 import * as fs from 'fs';
 
 interface FilterOptions {
@@ -23,6 +23,7 @@ interface ElementWithLocators {
   clickable: boolean;
   enabled: boolean;
   displayed: boolean;
+  bounds?: string;
 }
 
 // Main function to generate locators for all elements
@@ -42,6 +43,7 @@ function generateAllElementLocators(
   } = filters;
 
   const sourceJSON = xmlToJSON(sourceXML);
+  const sourceDoc = xmlToDOM(sourceXML); // Parse DOM once
   const allElementsWithLocators: ElementWithLocators[] = [];
 
   function shouldIncludeElement(element: JSONElement): boolean {
@@ -79,26 +81,26 @@ function generateAllElementLocators(
       const interactableTags =
         isNative && automationName === 'uiautomator2'
           ? [
-              'EditText',
-              'Button',
-              'ImageButton',
-              'CheckBox',
-              'RadioButton',
-              'Switch',
-              'ToggleButton',
-              'TextView',
-            ]
+            'EditText',
+            'Button',
+            'ImageButton',
+            'CheckBox',
+            'RadioButton',
+            'Switch',
+            'ToggleButton',
+            'TextView',
+          ]
           : [
-              'XCUIElementTypeTextField',
-              'XCUIElementTypeSecureTextField',
-              'XCUIElementTypeButton',
-              'XCUIElementTypeImage',
-              'XCUIElementTypeSwitch',
-              'XCUIElementTypeStaticText',
-              'XCUIElementTypeTextView',
-              'XCUIElementTypeCell',
-              'XCUIElementTypeLink',
-            ];
+            'XCUIElementTypeTextField',
+            'XCUIElementTypeSecureTextField',
+            'XCUIElementTypeButton',
+            'XCUIElementTypeImage',
+            'XCUIElementTypeSwitch',
+            'XCUIElementTypeStaticText',
+            'XCUIElementTypeTextView',
+            'XCUIElementTypeCell',
+            'XCUIElementTypeLink',
+          ];
       const isInteractable =
         interactableTags.some(tag => element.tagName.includes(tag)) ||
         element.attributes?.clickable === 'true' ||
@@ -121,9 +123,9 @@ function generateAllElementLocators(
 
     try {
       // Generate locators for current element
-      const strategyMap = getSuggestedLocators(
+      const strategyMap = getSuggestedLocatorsWithDOM(
         element,
-        sourceXML,
+        sourceDoc,
         isNative,
         automationName
       );
@@ -138,6 +140,7 @@ function generateAllElementLocators(
         clickable: element.attributes.clickable === 'true',
         enabled: element.attributes.enabled === 'true',
         displayed: element.attributes.displayed === 'true',
+        bounds: element.attributes.bounds,
       });
     } catch (error) {
       console.error(
